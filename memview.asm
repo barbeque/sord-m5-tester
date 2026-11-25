@@ -16,7 +16,6 @@
 .dw startup ; start vector
 
 startup:
-    ld sp, $c3ff ; set stack pointer like Girl's Garden does
     im 1
     jr init
 
@@ -44,10 +43,6 @@ _busywait_inner:
     ret
 
 init:
-    ; the stack is not set up properly by the BIOS
-    ; for some reason.
-    ld sp, RAM_BASE + TEST_LENGTH
-
     call MutePSG ; we know for sure we are getting to here
     ;call BusyWait
 
@@ -68,6 +63,16 @@ _really_ready_now:
     ld c, 0
     ld hl, STR_BANNER
     call print_string
+
+test_end_of_cart:
+    ; Grab the value from the end of the cartridge and let's see
+    ; what is there
+    ld a, (ROM_END)
+    ld h, 0
+    ld l, a
+    ld b, 1
+    ld c, 1
+    call get_hex_digit
 
 done_testing:
 busy_loop:
