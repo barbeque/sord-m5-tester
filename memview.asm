@@ -6,8 +6,6 @@
 
 #include "vdp_macros.asm"
 
-; TODO: header??
-
 #target rom
 #data DATA, RAM_BASE, *
 #code rom, $2000, *
@@ -46,12 +44,21 @@ _busywait_inner:
     ret
 
 init:
+    ; the stack is not set up properly by the BIOS
+    ; for some reason.
+    ld sp, RAM_BASE + TEST_LENGTH
+
     call MutePSG ; we know for sure we are getting to here
-    call BusyWait
+    ;call BusyWait
+
 _really_ready_now:
 
     di
 
+    ; We may have to modify a bunch of this stuff
+    ; if the M5 is in a weird configuration when it
+    ; comes out of the BIOS. It seems to, at the very least,
+    ; modify tiles.
     call ScreenInit
     call ClearVRAM
     call DefineFont
