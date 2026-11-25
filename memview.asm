@@ -19,28 +19,9 @@ startup:
     im 1
     jr init
 
-; TODO: reset, etc vectors?
+; TODO: NMI, keyboard vectors?
 reset:
     jr init
-
-    ; The VDP gets reset at system startup, but it takes a lot
-    ; longer than the CPU to be ready for action. We could do a
-    ; bunch of setup stuff here, but instead we'll just spin until
-    ; we think the VDP should be willing to listen to us.
-
-    ; copied from the SG-1000: unsure if the Sord M5's monitor ROM takes care of this
-BusyWait:
-    ld d, $3 ; girls garden used $2 x $ffff
-_busywait_outer:
-    ld hl, $ffff
-_busywait_inner:
-    dec hl
-    ld a,h
-    or l
-    jr nz, _busywait_inner
-    dec d
-    jr nz, _busywait_outer
-    ret
 
 init:
     call MutePSG ; we know for sure we are getting to here
@@ -72,7 +53,7 @@ test_end_of_cart:
     ld l, a
     ld b, 1
     ld c, 1
-    call get_hex_digit
+    call print_hex
 
 done_testing:
 busy_loop:
@@ -183,4 +164,4 @@ STR_BANNER: .asciz "Hello Sord!"
 #include "font_8x8.asm"
 
 .org ROM_END ; force the resulting file to be 16K
-.db $ff
+.db $cc
