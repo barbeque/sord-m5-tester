@@ -1,6 +1,6 @@
 #define RAM_BASE $7000
 #define ROM_START $2000
-#define ROM_END $5fff ; for "20K" ROMs (8 + 8 + 4)
+#define ROM_END $5fff ; for "16K" ROMs (8 + 8)
 
 #define TEST_LENGTH $fff ; only testing 8K of RAM
 
@@ -176,3 +176,6 @@ STR_BANNER: .asciz "Hello Sord!"
 
 #include "vdp.asm"
 #include "font_8x8.asm"
+
+.org ROM_END ; force the resulting file to be 16K
+.db $ff
