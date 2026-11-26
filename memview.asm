@@ -4,6 +4,8 @@
 
 #define TEST_LENGTH $fff ; only testing 8K of RAM
 
+#define SENTINEL $cc ; value at end of cart to make sure we mapped all 16k
+
 #include "vdp_macros.asm"
 
 #target rom
@@ -48,12 +50,39 @@ _really_ready_now:
 test_end_of_cart:
     ; Grab the value from the end of the cartridge and let's see
     ; what is there
+    ld b, 0
+    ld c, 1
+    ld hl, STR_END_OF_CART
+    call print_string
+
     ld a, (ROM_END)
     ld h, 0
     ld l, a
-    ld b, 1
+    ld b, 13
     ld c, 1
     call print_hex
+
+    ; Verify it's actually correct
+    ld a, (ROM_END) ; fetch actual value from ROM
+    cp SENTINEL ; must match assembled value
+    jp z, end_of_cart_ok
+
+    ; Print failure message
+    ld b, 1
+    ld c, 19
+    ld hl, STR_FAIL
+    call print_string
+    jr checksum_cart ; go to next test
+
+end_of_cart_ok:
+    ; Print pass message
+    ld b, 19
+    ld c, 1
+    ld hl, STR_OK
+    call print_string
+
+checksum_cart:
+
 
 done_testing:
 busy_loop:
@@ -159,9 +188,12 @@ _print_string_inner:
     ret
 
 STR_BANNER: .asciz "Hello Sord!"
+STR_END_OF_CART: .asciz "End of Cart:"
+STR_OK: .asciz "OK!!"
+STR_FAIL: .asciz "FAIL"
 
 #include "vdp.asm"
 #include "font_8x8.asm"
 
 .org ROM_END ; force the resulting file to be 16K
-.db $cc
+.db SENTINEL
