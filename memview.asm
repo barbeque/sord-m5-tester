@@ -117,6 +117,42 @@ _checksum_step:
     ld c, 2
     call print_hex
 
+checksum_bios:
+    ; Print label first
+    ld b, 0
+    ld c, 3
+    ld hl, STR_BIOS_CHECKSUM
+    call print_string
+
+    ; Sum up the entire space of the monitor ROM...
+    ld hl, 0
+    ld de, ROM_START
+    ld c, 0
+    ld b, 0
+_checksum_bios_step:
+    ld a, (hl)
+
+    ; add 8 bit to 16 bit (https://www.plutiedev.com/z80-add-8bit-to-16bit)
+    add a, c
+    ld c, a
+    adc a, b
+    sub c
+    ld b, a
+
+    inc hl
+
+    ; check if we're at ROM_END yet
+    or a
+    sbc hl, de
+    add hl, de
+    jr nz, _checksum_bios_step
+
+    ; print the checksum
+    ld hl, bc
+    ld b, 10
+    ld c, 3
+    call print_hex
+
 done_testing:
 busy_loop:
     jr busy_loop
@@ -223,6 +259,7 @@ _print_string_inner:
 STR_BANNER: .asciz "Hello Sord!"
 STR_END_OF_CART: .asciz "End of Cart:"
 STR_CHECKSUM: .asciz "Checksum:"
+STR_BIOS_CHECKSUM: .asciz "BIOS Sum:"
 STR_OK: .asciz "OK!!"
 STR_FAIL: .asciz "FAIL"
 
